@@ -1,7 +1,13 @@
 import copy
+import torch.nn as nn
 from math import floor
 
-import torch.nn as nn
+# STANDARD MODEL
+NUMBER_OF_LAYERS = 3
+NUMBER_OF_NEURONS = 60
+ACTIVATION_FUNCTION = nn.ReLU
+ARRANGEMENT = lambda x: 1
+
 
 class Model(nn.Module):
     def __init__(self, seq):
@@ -14,10 +20,16 @@ class Model(nn.Module):
 
 class ModelBuilder:
 
-    def new_model(self,  num_inputs, num_classes):
+    def new_model(self):
         self.clear()
-        self.num_input = num_inputs
-        self.num_classes = num_classes
+        self.num_input = -1
+        self.num_classes = -1
+
+    def set_input(self, n):
+        self.num_input = n
+
+    def set_classes(self, n):
+        self.num_classes = n
 
     def set_hidden_layers(self, n):
         self.hiden_layer = n
@@ -25,7 +37,7 @@ class ModelBuilder:
     def set_arrangement(self, arrangement):
         self.arrangement = arrangement
 
-    def set_func(self,func):
+    def set_func(self, func):
         self.func = func
 
     def set_neurons(self, n):
@@ -64,14 +76,18 @@ class ModelBuilder:
         prop += [self.num_classes]
         return [self.num_input] + prop
 
+    def __check_io_layers(self):
+        if self.num_classes == -1 or self.num_input == -1:
+            Exception("Size of input or output layer hasn't been set.")
 
     def finalize(self):
+        self.__check_io_layers()
         arrang = self.__get_proportion()
         seq = []
         for l in range(self.hiden_layer + 1):
             if self.func is not None:
                 seq.append(copy.deepcopy(self.func()))
-            l = nn.Linear(arrang[l], arrang[l+1])
+            l = nn.Linear(arrang[l], arrang[l + 1])
             w = l.weight.clone()
             b = l.bias.clone()
 
@@ -84,3 +100,9 @@ class ModelBuilder:
         seq.append(nn.Softmax())
         net = Model(seq)
         return net
+
+    def set_standard(self):
+        self.hiden_layer = NUMBER_OF_LAYERS
+        self.num_of_neurons = NUMBER_OF_NEURONS
+        self.func = ACTIVATION_FUNCTION
+        self.arrangement = ARRANGEMENT
