@@ -23,3 +23,8 @@ Whole program will be written in python with use of:
 - PyTorch    1.13.1
 - Pandas     1.5.3
 - OpenAI Gym 0.26.2
+
+## Sources
+- "Deep Reinforcement Learning Hands-On: Apply modern RL methods to practical problems of chatbots, robotics, 
+discrete optimization, web automation, and more, 2nd Edition" - Maxim Lapan
+- [PyTorch Documentation](https://pytorch.org/docs/stable/index.html)
