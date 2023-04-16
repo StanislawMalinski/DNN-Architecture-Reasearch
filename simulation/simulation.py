@@ -1,42 +1,45 @@
-from torch.optim import SGD
 from torch.nn import CrossEntropyLoss
 
-from environment import RB, Env
-from model_builder import ModelBuilder
+from simulation.env import Mem, Env
+from simulation.model_builder import ModelBuilder
 
-def simulation(opt, mb, bs, lr, eph):
-    pass
+INPUT = 20
+OUTPUT = 2
+CHECK_FREQ = 10
 
-def train_loop(env: Env, model, loss_fn, optimizer): #Code copied from https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html
+def simulation(opt, mb: ModelBuilder, bs, lr, eph):
+    res = []
+    mb.set_input(INPUT)
+    mb.set_classes(OUTPUT)
+    model = mb.finalize()
+    env = Mem()
+    env.set_input_size(INPUT)
+    env.set_output_size(OUTPUT)
+    for i in range(eph):
+        print(f"epoch: {i}")
+        r = train_loop(env, model, CrossEntropyLoss(), opt(params=model.parameters(), lr=lr), bs)
+        res.append(r)
+    return res
+
+
+def train_loop(env: Env, model, loss_fn, optimizer, batch): #Code copied from https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html
+    X = env.reset()
+    loss = 100
     for i in range(batch):
-        X = env.reset()
-        y = env.expected(X)
-
         pred = model(X)
-        loss = loss_fn(pred, y)
+        X, Y = env.step(pred)
+        loss = loss_fn(pred, Y)
 
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
-        if i % 100 == 0:
-            loss, current = loss.item(), (i + 1) * len(X)
+        if i % CHECK_FREQ == 0:
+            loss = loss.item()
+            current = (i + 1) * CHECK_FREQ
             print(f"loss: {loss:>7f}  [{current:>5d}]")
+    return float(loss)
 
 
-if __name__ == "__main__":
-    env = RB()
-    env.set_input(2)
-    env.set_output_size(2)
-    env.reset()
 
-    mb = ModelBuilder()
-    mb.new_model()
-    mb.set_input(env.get_input_size())
-    mb.set_classes(env.get_output_size())
-    model = mb.finalize()
 
-    objective = CrossEntropyLoss()
-    optim = SGD(params=model.parameters(), lr=0.1)
-
-    train_loop(env, model, objective, optim)
