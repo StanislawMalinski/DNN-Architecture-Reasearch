@@ -61,9 +61,6 @@ class ModelBuilder:
             sum += self.arrangement(lay)
             prop[lay] = self.arrangement(lay)
 
-        if self.hiden_layer == 1:
-            return [self.num_of_neurons]
-
         n = self.num_of_neurons
 
         for lay in range(self.hiden_layer - 1):
@@ -86,7 +83,7 @@ class ModelBuilder:
         seq = []
         for l in range(self.hiden_layer + 1):
             if self.func is not None:
-                seq.append(copy.deepcopy(self.func()))
+                seq.append(self.func())
             l = nn.Linear(arrang[l], arrang[l + 1])
             w = l.weight.clone()
             b = l.bias.clone()
