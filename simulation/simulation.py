@@ -1,10 +1,10 @@
-from torch.nn import CrossEntropyLoss
+from torch import nn
 
-from simulation.env import Mem, Env
+from simulation.env import Mem, Env, SqApr, LinApr
 from simulation.model_builder import ModelBuilder
 
-INPUT = 20
-OUTPUT = 2
+INPUT = 50
+OUTPUT = 5
 CHECK_FREQ = 10
 
 def simulation(opt, mb: ModelBuilder, bs, lr, eph):
@@ -15,31 +15,36 @@ def simulation(opt, mb: ModelBuilder, bs, lr, eph):
     env = Mem()
     env.set_input_size(INPUT)
     env.set_output_size(OUTPUT)
+    env.reset()
     for i in range(eph):
         print(f"epoch: {i}")
-        r = train_loop(env, model, CrossEntropyLoss(), opt(params=model.parameters(), lr=lr), bs)
+        r = train_loop(env, model, opt(params=model.parameters(), lr=lr), bs)
         res.append(r)
     return res
 
 
-def train_loop(env: Env, model, loss_fn, optimizer, batch): #Code copied from https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html
-    X = env.reset()
-    loss = 100
+def train_loop(env: Env, model, optimizer, batch):
+    X = env.observation()
+    loss_fn = nn.MSELoss()
+    loss = 1
+    check = 0.0
+    sum_loss = 0.0
     for i in range(batch):
         pred = model(X)
-        X, Y = env.step(pred)
+        X_new, Y = env.step(pred)
         loss = loss_fn(pred, Y)
 
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
+        X = X_new
+
         if i % CHECK_FREQ == 0:
             loss = loss.item()
+            sum_loss += float(loss)
+            check += 1
             current = (i + 1) * CHECK_FREQ
             print(f"loss: {loss:>7f}  [{current:>5d}]")
-    return float(loss)
 
-
-
-
+    return sum_loss/check

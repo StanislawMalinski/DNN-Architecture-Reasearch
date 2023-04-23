@@ -1,18 +1,18 @@
-from torch.optim import Adam
+from torch.optim import NAdam
 
 from simulation.model_builder import ModelBuilder
 from simulation.simulation import simulation
 import pandas as pd
 
-DEFAULT_BATCH_SIZE = 10
-DEFAULT_LEARNING_RATE = 0.0001
-DEFAULT_OPTIMIZER = Adam
+DEFAULT_BATCH_SIZE = 100
+DEFAULT_LEARNING_RATE = 0.00001
+DEFAULT_OPTIMIZER = NAdam
 
 
 def test_optimizers(epoch, params):
     print("Optimizer simulation:")
     mb = ModelBuilder()
-    mb.set_standard()
+    mb.clear()
     label = []
     results = []
     for opt in params:
@@ -27,7 +27,7 @@ def test_optimizers(epoch, params):
 def test_activation_function(epoch, param):
     print("Activation function simulation:")
     mb = ModelBuilder()
-    mb.set_standard()
+    mb.clear()
     label = []
     results = []
     for fun in param:
@@ -43,7 +43,7 @@ def test_activation_function(epoch, param):
 def test_arrangement(epoch, param):
     print("Arrangment simulation:")
     mb = ModelBuilder()
-    mb.set_standard()
+    mb.clear()
     label = []
     results = []
     for arra in param:
@@ -58,7 +58,7 @@ def test_arrangement(epoch, param):
 def test_layers(epoch, param):
     print("Layer size simulation:")
     mb = ModelBuilder()
-    mb.set_standard()
+    mb.clear()
     label = []
     results = []
     for n in param:
@@ -74,7 +74,7 @@ def test_layers(epoch, param):
 def test_neurons(epoch, param):
     print("Number of neurons simulation:")
     mb = ModelBuilder()
-    mb.set_standard()
+    mb.clear()
     label = []
     results = []
     for n in param:
@@ -96,7 +96,7 @@ def test_regularization(epoch, param):
 def test_learning_rate(epoch, param):
     print("Learning rate simulation:")
     mb = ModelBuilder()
-    mb.set_standard()
+    mb.clear()
     label = []
     results = []
     for lr in param:
@@ -111,7 +111,7 @@ def test_learning_rate(epoch, param):
 def test_batch_size(epoch, param):
     print("Batch size simulation:")
     mb = ModelBuilder()
-    mb.set_standard()
+    mb.clear()
     label = []
     results = []
     for bs in param:
@@ -128,7 +128,7 @@ def run_tests(epoch: int, configuration: dict):
     if "opt" in configuration.keys():
         r = test_optimizers(epoch, configuration["opt"])
         res["opt"] = r
-    '''
+    
     if "func" in configuration.keys():
         r = test_activation_function(epoch, configuration["func"])
         res["func"] = r
@@ -156,5 +156,5 @@ def run_tests(epoch: int, configuration: dict):
     if "bs" in configuration.keys():
         r = test_batch_size(epoch, configuration["bs"])
         res["bs"] = r
-    '''
+
     return res

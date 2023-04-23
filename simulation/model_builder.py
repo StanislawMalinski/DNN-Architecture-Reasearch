@@ -1,9 +1,8 @@
-import copy
 import torch.nn as nn
 from math import floor
 
 # STANDARD MODEL
-NUMBER_OF_LAYERS = 3
+NUMBER_OF_LAYERS = 2
 NUMBER_OF_NEURONS = 60
 ACTIVATION_FUNCTION = nn.ReLU
 ARRANGEMENT = lambda x: 1
@@ -19,7 +18,6 @@ class Model(nn.Module):
 
 
 class ModelBuilder:
-
     def new_model(self):
         self.clear()
         self.num_input = -1
@@ -43,15 +41,11 @@ class ModelBuilder:
     def set_neurons(self, n):
         self.num_of_neurons = n
 
-    def set_regularization(self, regularization):
-        self.regularization = regularization
-
     def clear(self):
-        self.func = None
-        self.hiden_layer = 5
-        self.arrangement = lambda x: 1
-        self.num_of_neurons = 50
-        self.regularization = None
+        self.func = ACTIVATION_FUNCTION
+        self.hiden_layer = NUMBER_OF_LAYERS
+        self.arrangement = ARRANGEMENT
+        self.num_of_neurons = NUMBER_OF_NEURONS
 
     def __get_proportion(self):
         sum = 0
@@ -84,22 +78,16 @@ class ModelBuilder:
         for l in range(self.hiden_layer + 1):
             if self.func is not None:
                 seq.append(self.func())
-            l = nn.Linear(arrang[l], arrang[l + 1])
-            w = l.weight.clone()
-            b = l.bias.clone()
+            lay = nn.Linear(arrang[l], arrang[l + 1])
+            w = lay.weight.clone()
+            b = lay.bias.clone()
 
             w[:] = 0.00001
             b[:] = 0.00001
-            l.weight = nn.Parameter(w)
-            l.bias = nn.Parameter(b)
+            lay.weight = nn.Parameter(w)
+            lay.bias = nn.Parameter(b)
 
-            seq.append(l)
-        seq.append(nn.Softmax())
+            seq.append(lay)
         net = Model(seq)
         return net
 
-    def set_standard(self):
-        self.hiden_layer = NUMBER_OF_LAYERS
-        self.num_of_neurons = NUMBER_OF_NEURONS
-        self.func = ACTIVATION_FUNCTION
-        self.arrangement = ARRANGEMENT
