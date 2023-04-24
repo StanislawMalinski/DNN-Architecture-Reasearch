@@ -1,5 +1,8 @@
+import torch
 import torch.nn as nn
 from math import floor
+
+CUDA = True
 
 # STANDARD MODEL
 NUMBER_OF_LAYERS = 2
@@ -89,5 +92,7 @@ class ModelBuilder:
 
             seq.append(lay)
         net = Model(seq)
+        if CUDA:
+            net.to(torch.device('cuda:0'))
         return net
 
