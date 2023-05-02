@@ -3,12 +3,13 @@ import torch.optim as op
 import numpy as np
 import os
 import datetime
-
 import visualisation
 from simulation.runner import run_tests
+from simulation.env import Mem, SqApr, LinApr
+from util import terms
 
 # To perform simulation fill in the variables bellow:
-epoch_numb = 30
+epoch_numb = 100
 
 # Standard Model
 NUMBER_OF_LAYERS = 2
@@ -19,10 +20,15 @@ DEFAULT_BATCH_SIZE = 100
 DEFAULT_LEARNING_RATE = 0.0001
 DEFAULT_OPTIMIZER = op.Adam
 
+# Environments
+envs = {"Pattern memorising": Mem,
+        "Square function aproximation": SqApr,
+        "Linear function aproximation": LinApr}
+
 # 1
 optimizer = (
     op.Adadelta, op.Adagrad, op.Adam, op.AdamW, op.Adamax,
-    op.ASGD, op.NAdam, op.RAdam, op.RMSprop, op.Rprop, op.SGD)
+    op.ASGD, op.NAdam, op.RAdam, op.RMSprop, op.SGD)
 
 # 2
 activation_func = (
@@ -31,9 +37,12 @@ activation_func = (
     nn.Mish, nn.Softplus, nn.Softshrink, nn.Softsign, nn.Tanh, nn.Tanhshrink, nn.Softmax)
 
 # 3
-neurons_arrangement = ({"def": lambda x: 1, "str": "Const"},
-                       {"def": lambda x: x * 0.3 + 1, "str": "Liniowy od 1"},
-                       {"def": lambda x: -x * 0.3 + 1, "str": "Liniowy do 1"})
+neurons_arrangement = ({"def": lambda x: 1,             "str": "Const"},
+                       {"def": lambda x: x * 0.3 + 1,   "str": "Gęstość 1 + x*0.3"},
+                       {"def": lambda x: -x * 0.3 + 1,  "str": "Gęstość 1 - x*0.3"},
+                       {"def": lambda x: x,             "str": "Gęstość x"},
+                       {"def": lambda x: -x,            "str": "Gęstość -x"})
+
 
 # 4
 number_of_layers = tuple(range(1, 21))
@@ -65,23 +74,19 @@ if __name__ == '__main__':
                             "neu": number_of_neurons_in_layer,
                             "lr": learning_rate,
                             "bs": batch_size,
-                            "std_model": std}
+                            "std_model": std,
+                            "envs": envs}
 
-    # res = run_tests(epoch_numb, tested_configuration)
-
-    res = run_tests(epoch_numb, {"lr": learning_rate,"std_model": std})
-
-    df = res["lr"]
-    visualisation.visualise(df)
+    res = run_tests(epoch_numb, tested_configuration)
 
     date = datetime.datetime.now().strftime("%x").replace("/", "-")
-    dir = f"C:\\Users\\Staszek\\Documents\\Investing\\DNNReasearch\\Results\\Results({date})"
 
-    visualisation.visualise(res["lr"])
 
-    if not os.path.isdir(dir):
-        os.mkdir(dir)
+    for env in envs.keys():
+        dir = f"C:\\Users\\Staszek\\Documents\\Investing\\DNNReasearch\\Results\\Results({date})\\{env}"
+        if not os.path.isdir(dir):
+            os.mkdir(dir)
 
-    for key in res.keys():
-        df = res[key]
-        df.to_csv(f"C:\\Users\\Staszek\\Documents\\Investing\\DNNReasearch\\Results\\Results({date})\\{key}.csv")
+        for key in terms.keys():
+            df = res[env][key]
+            df.to_csv(f"C:\\Users\\Staszek\\Documents\\Investing\\DNNReasearch\\Results\\Results({date})\\{env}\\{key}.csv")
