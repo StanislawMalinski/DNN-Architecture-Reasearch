@@ -4,13 +4,6 @@ from math import floor
 
 CUDA = True
 
-# STANDARD MODEL
-NUMBER_OF_LAYERS = 2
-NUMBER_OF_NEURONS = 60
-ACTIVATION_FUNCTION = nn.ReLU
-ARRANGEMENT = lambda x: 1
-
-
 class Model(nn.Module):
     def __init__(self, seq):
         super(Model, self).__init__()
@@ -21,10 +14,9 @@ class Model(nn.Module):
 
 
 class ModelBuilder:
-    def new_model(self):
+    def __init__(self, std):
+        self.std = std
         self.clear()
-        self.num_input = -1
-        self.num_classes = -1
 
     def set_input(self, n):
         self.num_input = n
@@ -45,10 +37,12 @@ class ModelBuilder:
         self.num_of_neurons = n
 
     def clear(self):
-        self.func = ACTIVATION_FUNCTION
-        self.hiden_layer = NUMBER_OF_LAYERS
-        self.arrangement = ARRANGEMENT
-        self.num_of_neurons = NUMBER_OF_NEURONS
+        self.func = self.std["func"]
+        self.hiden_layer = self.std["lay"]
+        self.arrangement = self.std["arra"]
+        self.num_of_neurons = self.std["neu"]
+        self.num_input = -1
+        self.num_classes = -1
 
     def __get_proportion(self):
         sum = 0
