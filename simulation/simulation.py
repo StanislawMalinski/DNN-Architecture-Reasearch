@@ -1,50 +1,66 @@
 from torch import nn
 
-from simulation.env import Mem, Env, SqApr, LinApr
+from simulation.env import Env
 from simulation.model_builder import ModelBuilder
 
 INPUT = 50
 OUTPUT = 5
 CHECK_FREQ = 10
 
-def simulation(opt, mb: ModelBuilder, bs, lr, eph):
-    res = []
+def one_observation(env, model):
+    X = env.observation()
+    pred = model(X)
+    X_new, Y = env.step(pred)
+    loss_fn = nn.MSELoss()
+    loss = loss_fn(pred, Y)
+    return loss.item()
+
+def simulation(mb: ModelBuilder, env, opt, bs, lr, eph):
     mb.set_input(INPUT)
     mb.set_classes(OUTPUT)
     model = mb.finalize()
-    env = Mem()
-    env.set_input_size(INPUT)
-    env.set_output_size(OUTPUT)
+    env = env()
+    if env.get_required_sizes() is not None:
+        inp, out = env.get_required_sizes()
+        env.set_input_size(inp)
+        env.set_output_size(out)
+    else:
+        env.set_input_size(INPUT)
+        env.set_output_size(OUTPUT)
     env.reset()
+
+    res = [one_observation(env, model)]
     for i in range(eph):
         print(f"epoch: {i}")
-        r = train_loop(env, model, opt(params=model.parameters(), lr=lr), bs)
+        r = bs_train_loop(env, model, opt(params=model.parameters(), lr=lr), bs)
         res.append(r)
     return res
 
-
-def train_loop(env: Env, model, optimizer, batch):
+def bs_train_loop(env: Env, model, optimizer, batch):
     X = env.observation()
     loss_fn = nn.MSELoss()
-    loss = 1
-    check = 0.0
+    check = 0
     sum_loss = 0.0
+    min = 1000
+    optimizer.zero_grad()
     for i in range(batch):
         pred = model(X)
+
         X_new, Y = env.step(pred)
         loss = loss_fn(pred, Y)
 
-        optimizer.zero_grad()
+        X = X_new
+
         loss.backward()
         optimizer.step()
 
-        X = X_new
+        loss_l = loss.item()
+        sum_loss += float(loss_l)
+        check += 1
+        if loss < min:
+            min = loss_l
 
         if i % CHECK_FREQ == 0:
-            loss = loss.item()
-            sum_loss += float(loss)
-            check += 1
-            current = (i + 1) * CHECK_FREQ
-            print(f"loss: {loss:>7f}  [{current:>5d}]")
+            print(f"loss: {loss_l:>7f}")
 
-    return sum_loss/check
+    return min
