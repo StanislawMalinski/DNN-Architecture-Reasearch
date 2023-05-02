@@ -6,6 +6,7 @@ from simulation.model_builder import CUDA
 
 class Env(ABC):
     def __init__(self):
+        self._required_sizes = None
         self._input_size = -1
         self._output_size = -1
 
@@ -27,6 +28,9 @@ class Env(ABC):
     def get_output_size(self):
         return self._output_size
 
+    def get_required_sizes(self):
+        return self._required_sizes
+
     @abstractmethod
     def observation(self):
         return None
@@ -47,8 +51,8 @@ class Mem(Env):
         self.set = []
         torch.manual_seed(1)
         for i in range(NUMBER_OF_PATTERNS):
-            A = torch.rand(self._input_size)
-            B = torch.round(torch.rand(self.get_output_size()))
+            A = torch.round(torch.rand(self._input_size))
+            B = torch.round(torch.rand(self._output_size))
 
             self.set.append((A, B))
         return self.observation()
@@ -76,10 +80,10 @@ class SqApr(Env):
         return self.__state
 
     def step(self, action):
-        y = self.__state**2
+        y = (self.__state**2).sum()/self.get_output_size()
         if CUDA:
-            return self.observation(), torch.tensor([y.sum()/self.get_output_size()]*self.get_output_size()).to(torch.device('cuda:0'))
-        return self.observation(), torch.tensor([y.sum()/self.get_output_size()]*self.get_output_size())
+            return self.observation(), torch.tensor([y]*self.get_output_size()).to(torch.device('cuda:0'))
+        return self.observation(), torch.tensor([y]*self.get_output_size())
 
 class LinApr(Env):
     def reset(self):
@@ -93,5 +97,5 @@ class LinApr(Env):
     def step(self, action):
         y = self.__state.sum()/self.get_output_size()
         if CUDA:
-            return self.observation(), torch.tensor([y]*self.get_output_size()).to(torch.device('cuda:0'))
+            return self.observation(), torch.tensor([y] * self.get_output_size()).to(torch.device('cuda:0'))
         return self.observation(), torch.tensor([y] * self.get_output_size())
