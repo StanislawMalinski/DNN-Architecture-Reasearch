@@ -2,6 +2,7 @@ from torch import nn
 
 from simulation.env import Env
 from simulation.model_builder import ModelBuilder
+from simulation.status import Status
 
 INPUT = 50
 OUTPUT = 5
@@ -31,7 +32,7 @@ def simulation(mb: ModelBuilder, env, opt, bs, lr, eph):
 
     res = [one_observation(env, model)]
     for i in range(eph):
-        print(f"epoch: {i}")
+        Status.get_status().tic_epoch(f"epoch: {i}")
         r = bs_train_loop(env, model, opt(params=model.parameters(), lr=lr), bs)
         res.append(r)
     return res
@@ -61,6 +62,6 @@ def bs_train_loop(env: Env, model, optimizer, batch):
             min = loss_l
 
         if i % CHECK_FREQ == 0:
-            print(f"loss: {loss_l:>7f}")
+            Status.get_status().print(f"loss: {loss_l:>7f}")
 
     return min

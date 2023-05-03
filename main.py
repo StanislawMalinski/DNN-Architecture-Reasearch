@@ -3,7 +3,6 @@ import torch.optim as op
 import numpy as np
 import os
 import datetime
-import visualisation
 from simulation.runner import run_tests
 from simulation.env import Mem, SqApr, LinApr
 from util import terms
@@ -58,7 +57,6 @@ batch_size = tuple(range(1, 100, 10))
 
 # and start the program
 if __name__ == '__main__':
-
     std = {"opt": DEFAULT_OPTIMIZER,
            "func": ACTIVATION_FUNCTION,
            "arra": ARRANGEMENT,
@@ -81,6 +79,9 @@ if __name__ == '__main__':
 
     date = datetime.datetime.now().strftime("%x").replace("/", "-")
 
+    dir_res = f"C:\\Users\\Staszek\\Documents\\Investing\\DNNReasearch\\Results\\Results({date})"
+    if not os.path.isdir(dir_res):
+        os.mkdir(dir_res)
 
     for env in envs.keys():
         dir = f"C:\\Users\\Staszek\\Documents\\Investing\\DNNReasearch\\Results\\Results({date})\\{env}"
