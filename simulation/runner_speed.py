@@ -7,7 +7,6 @@ from simulation.status import Status
 
 
 def test_optimizers(std_model, env ,params, epoch):
-    print("Optimizer simulation:")
     mb = ModelBuilder(std_model)
     mb.clear()
     label = []
@@ -16,7 +15,7 @@ def test_optimizers(std_model, env ,params, epoch):
     for opt in params:
         name = re.search(r'\w+\'',str(opt)).group()[0:-1]
         Status.get_status().set_value(name)
-        res = simulation(mb, env, opt, std_model["bs"], std_model["lr"], epoch)
+        res = simulation(mb, env(), opt, std_model["bs"], std_model["lr"], epoch)
         results.append(res)
         label.append(name)
     r = pd.DataFrame(results, index=label)
@@ -24,7 +23,6 @@ def test_optimizers(std_model, env ,params, epoch):
 
 
 def test_activation_function(std_model, env ,params, epoch):
-    print("Activation function simulation:")
     mb = ModelBuilder(std_model)
     mb.clear()
     label = []
@@ -34,7 +32,7 @@ def test_activation_function(std_model, env ,params, epoch):
         name = re.search(r'\w+\'', str(fun)).group()[0:-1]
         Status.get_status().set_value(name)
         mb.set_func(fun)
-        res = simulation(mb, env, std_model["opt"], std_model["bs"], std_model["lr"], epoch)
+        res = simulation(mb, env(), std_model["opt"], std_model["bs"], std_model["lr"], epoch)
         results.append(res)
         label.append(name)
     r = pd.DataFrame(results, index=label)
@@ -42,7 +40,6 @@ def test_activation_function(std_model, env ,params, epoch):
 
 
 def test_arrangement(std_model, env ,params, epoch):
-    print("Arrangment simulation:")
     mb = ModelBuilder(std_model)
     mb.clear()
     label = []
@@ -51,7 +48,7 @@ def test_arrangement(std_model, env ,params, epoch):
     for arra in params:
         Status.get_status().set_value(arra["str"])
         mb.set_arrangement(arra["def"])
-        res = simulation(mb, env, std_model["opt"], std_model["bs"], std_model["lr"], epoch)
+        res = simulation(mb, env(), std_model["opt"], std_model["bs"], std_model["lr"], epoch)
         results.append(res)
         label.append(arra["str"])
     r = pd.DataFrame(results, index=label)
@@ -59,7 +56,6 @@ def test_arrangement(std_model, env ,params, epoch):
 
 
 def test_layers(std_model, env ,params, epoch):
-    print("Layer size simulation:")
     mb = ModelBuilder(std_model)
     mb.clear()
     label = []
@@ -68,7 +64,7 @@ def test_layers(std_model, env ,params, epoch):
     for n in params:
         Status.get_status().set_value(n)
         mb.set_hidden_layers(n)
-        res = simulation(mb, env, std_model["opt"], std_model["bs"], std_model["lr"], epoch)
+        res = simulation(mb, env(), std_model["opt"], std_model["bs"], std_model["lr"], epoch)
         results.append(res)
         label.append("layers=" + str(n))
     r = pd.DataFrame(results, index=label)
@@ -76,7 +72,6 @@ def test_layers(std_model, env ,params, epoch):
 
 
 def test_neurons(std_model, env ,params, epoch):
-    print("Number of neurons simulation:")
     mb = ModelBuilder(std_model)
     mb.clear()
     label = []
@@ -85,7 +80,7 @@ def test_neurons(std_model, env ,params, epoch):
     for n in params:
         Status.get_status().set_value(n)
         mb.set_neurons(n)
-        res = simulation(mb, env, std_model["opt"], std_model["bs"], std_model["lr"], epoch)
+        res = simulation(mb, env(), std_model["opt"], std_model["bs"], std_model["lr"], epoch)
         results.append(res)
         label.append("neurons=" + str(n))
     r = pd.DataFrame(results, index=label)
@@ -93,7 +88,6 @@ def test_neurons(std_model, env ,params, epoch):
 
 
 def test_learning_rate(std_model, env ,params, epoch):
-    print("Learning rate simulation:")
     mb = ModelBuilder(std_model)
     mb.clear()
     label = []
@@ -101,7 +95,7 @@ def test_learning_rate(std_model, env ,params, epoch):
     Status.get_status().set_param("learning rate")
     for lr in params:
         Status.get_status().set_value(lr)
-        res = simulation(mb, env, std_model["opt"], std_model["bs"], lr, epoch)
+        res = simulation(mb, env(), std_model["opt"], std_model["bs"], lr, epoch)
         results.append(res)
         label.append("lr=" + str(lr))
     r = pd.DataFrame(results, index=label)
@@ -109,7 +103,6 @@ def test_learning_rate(std_model, env ,params, epoch):
 
 
 def test_batch_size(std_model, env ,params, epoch):
-    print("Batch size simulation:")
     mb = ModelBuilder(std_model)
     mb.clear()
     label = []
@@ -117,7 +110,7 @@ def test_batch_size(std_model, env ,params, epoch):
     Status.get_status().set_param("batch")
     for bs in params:
         Status.get_status().set_value(bs)
-        res = simulation(mb, env, std_model["opt"], bs, std_model["lr"], epoch)
+        res = simulation(mb, env(), std_model["opt"], bs, std_model["lr"], epoch)
         results.append(res)
         label.append("bs=" + str(bs))
     r = pd.DataFrame(results, index=label)
@@ -132,7 +125,7 @@ def init_status_bar(epoch, configuration):
         per_env += len(configuration[key])
     Status(epoch * envs * per_env)
 
-def run_tests(epoch: int, configuration: dict):
+def run_tests_speed(epoch: int, configuration: dict):
     keys = configuration["envs"].keys()
     envs = configuration["envs"]
     init_status_bar(epoch, configuration)

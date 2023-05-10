@@ -1,14 +1,14 @@
 import torch.nn as nn
 import torch.optim as op
 import numpy as np
-import os
-import datetime
-from simulation.runner import run_tests
+from simulation.runner_speed import run_tests_speed
+from simulation.runner_mem import run_tests_mem
 from simulation.env import Mem, SqApr, LinApr
-from util import terms
+from util import save_results
 
 # To perform simulation fill in the variables bellow:
-epoch_numb = 100
+epoch_numb_speed = 100
+epoch_numb_mem = 100
 
 # Standard Model
 NUMBER_OF_LAYERS = 2
@@ -24,6 +24,12 @@ envs = {"Pattern memorising": Mem,
         "Square function aproximation": SqApr,
         "Linear function aproximation": LinApr}
 
+# Memory capacity test
+number_of_pattern_tested = tuple(range(5, 50, 5))
+number_of_neuron_per_layer = tuple(range(20, 40, 4))  # changing number of neurons and number of layers
+number_of_layer = tuple(range(1, 8))
+number_of_neurons = tuple(range(60, 200, 20))  # changing only number of layers
+
 # 1
 optimizer = (
     op.Adadelta, op.Adagrad, op.Adam, op.AdamW, op.Adamax,
@@ -36,12 +42,11 @@ activation_func = (
     nn.Mish, nn.Softplus, nn.Softshrink, nn.Softsign, nn.Tanh, nn.Tanhshrink, nn.Softmax)
 
 # 3
-neurons_arrangement = ({"def": lambda x: 1,             "str": "Const"},
-                       {"def": lambda x: x * 0.3 + 1,   "str": "Gęstość 1 + x*0.3"},
-                       {"def": lambda x: -x * 0.3 + 1,  "str": "Gęstość 1 - x*0.3"},
-                       {"def": lambda x: x,             "str": "Gęstość x"},
-                       {"def": lambda x: -x,            "str": "Gęstość -x"})
-
+neurons_arrangement = ({"def": lambda x: 1, "str": "Const"},
+                       {"def": lambda x: x * 0.3 + 1, "str": "Gęstość 1 + x*0.3"},
+                       {"def": lambda x: -x * 0.3 + 1, "str": "Gęstość 1 - x*0.3"},
+                       {"def": lambda x: x, "str": "Gęstość x"},
+                       {"def": lambda x: -x, "str": "Gęstość -x"})
 
 # 4
 number_of_layers = tuple(range(1, 21))
@@ -65,29 +70,26 @@ if __name__ == '__main__':
            "lr": DEFAULT_LEARNING_RATE,
            "bs": DEFAULT_BATCH_SIZE}
 
-    tested_configuration = {"opt": optimizer,
-                            "func": activation_func,
-                            "arra": neurons_arrangement,
-                            "lay": number_of_layers,
-                            "neu": number_of_neurons_in_layer,
-                            "lr": learning_rate,
-                            "bs": batch_size,
-                            "std_model": std,
-                            "envs": envs}
+    #  Speed test
+    tested_configuration_speed = {"opt": optimizer,
+                                  "func": activation_func,
+                                  "arra": neurons_arrangement,
+                                  "lay": number_of_layers,
+                                  "neu": number_of_neurons_in_layer,
+                                  "lr": learning_rate,
+                                  "bs": batch_size,
+                                  "std_model": std,
+                                  "envs": envs}
 
-    res = run_tests(epoch_numb, tested_configuration)
+    #  Memory test
+    tested_configuration_mem = {"problem_size": number_of_pattern_tested,
+                                "neu_per_lay": number_of_neuron_per_layer,
+                                "n_lay": number_of_layer,
+                                "n_neu": number_of_neurons,
+                                "std_model": std}
 
-    date = datetime.datetime.now().strftime("%x").replace("/", "-")
-
-    dir_res = f"C:\\Users\\Staszek\\Documents\\Investing\\DNNReasearch\\Results\\Results({date})"
-    if not os.path.isdir(dir_res):
-        os.mkdir(dir_res)
-
-    for env in envs.keys():
-        dir = f"C:\\Users\\Staszek\\Documents\\Investing\\DNNReasearch\\Results\\Results({date})\\{env}"
-        if not os.path.isdir(dir):
-            os.mkdir(dir)
-
-        for key in terms.keys():
-            df = res[env][key]
-            df.to_csv(f"C:\\Users\\Staszek\\Documents\\Investing\\DNNReasearch\\Results\\Results({date})\\{env}\\{key}.csv")
+    # Tests
+    #res_speed = run_tests_speed(epoch_numb_speed, tested_configuration_speed)
+    #save_results(res_speed)
+    res_mem = run_tests_mem(epoch_numb_mem, tested_configuration_mem)
+    save_results(res_mem)

@@ -1,6 +1,6 @@
 from torch import nn
 
-from simulation.env import Env
+from simulation.env import Env, Mem
 from simulation.model_builder import ModelBuilder
 from simulation.status import Status
 
@@ -20,7 +20,6 @@ def simulation(mb: ModelBuilder, env, opt, bs, lr, eph):
     mb.set_input(INPUT)
     mb.set_classes(OUTPUT)
     model = mb.finalize()
-    env = env()
     if env.get_required_sizes() is not None:
         inp, out = env.get_required_sizes()
         env.set_input_size(inp)

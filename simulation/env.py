@@ -42,15 +42,17 @@ class Env(ABC):
     @abstractmethod
     def step(self, action):
         return None  # observation, error
-
-NUMBER_OF_PATTERNS = 20
-
 class Mem(Env):
+
+    def __init__(self, pattern=20):
+        super().__init__()
+        self.number_of_patterns = pattern
+
     def reset(self):
         self._check_sizes()
         self.set = []
         torch.manual_seed(1)
-        for i in range(NUMBER_OF_PATTERNS):
+        for i in range(self.number_of_patterns):
             A = torch.round(torch.rand(self._input_size))
             B = torch.round(torch.rand(self._output_size))
 
