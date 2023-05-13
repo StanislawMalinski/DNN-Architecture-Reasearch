@@ -6,6 +6,9 @@ from simulation.runner_mem import run_tests_mem
 from simulation.env import Mem, SqApr, LinApr
 from util import save_results
 
+# If the computer that you are running uses Windows please set option WINDOWS to True
+WINDOWS = False
+
 # To perform simulation fill in the variables bellow:
 epoch_numb_speed = 100
 epoch_numb_mem = 100
@@ -89,7 +92,7 @@ if __name__ == '__main__':
                                 "std_model": std}
 
     # Tests
-    #res_speed = run_tests_speed(epoch_numb_speed, tested_configuration_speed)
-    #save_results(res_speed)
-    res_mem = run_tests_mem(epoch_numb_mem, tested_configuration_mem)
-    save_results(res_mem)
+    res_speed = run_tests_speed(epoch_numb_speed, tested_configuration_speed)
+    #save_results(res_speed, WINDOWS)
+    #res_mem = run_tests_mem(epoch_numb_mem, tested_configuration_mem)
+    #save_results(res_mem, WINDOWS)

@@ -3,8 +3,7 @@ import re
 import pandas as pd
 import matplotlib.pyplot as plt
 from util import terms
-
-BACK_SLASH = False
+from main import WINDOWS
 
 def visualise(data: pd.DataFrame, title="DNN reaserch"):
     data.plot()
@@ -16,7 +15,7 @@ def visualise(data: pd.DataFrame, title="DNN reaserch"):
 def visualise_folder(path, worst=-1, best=-1):
     if not os.path.isdir(path):
         Exception("Podany folder nie istnieje.")
-    if BACK_SLASH:
+    if WINDOWS:
         files = [path + "\\" + f for f in os.listdir(path)]
         for file in files:
             if os.path.isdir(file):
