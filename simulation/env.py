@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 import torch
 from simulation.model_builder import CUDA
 
+
 class Env(ABC):
     def __init__(self):
         self._required_sizes = None
@@ -42,6 +43,8 @@ class Env(ABC):
     @abstractmethod
     def step(self, action):
         return None  # observation, error
+
+
 class Mem(Env):
 
     def __init__(self, pattern=20):
@@ -75,6 +78,9 @@ class Mem(Env):
 class SqApr(Env):
     def reset(self):
         self._check_sizes()
+        self.weight
+
+
     def observation(self):
         self.__state = torch.rand(self._input_size)
         if CUDA:
@@ -82,14 +88,22 @@ class SqApr(Env):
         return self.__state
 
     def step(self, action):
-        y = (self.__state**2).sum()/self.get_output_size()
+        y = (self.__state ** 2).sum() / self.get_output_size()
         if CUDA:
-            return self.observation(), torch.tensor([y]*self.get_output_size()).to(torch.device('cuda:0'))
-        return self.observation(), torch.tensor([y]*self.get_output_size())
+            return self.observation(), torch.tensor([y] * self.get_output_size()).to(torch.device('cuda:0'))
+        return self.observation(), torch.tensor([y] * self.get_output_size())
+
 
 class LinApr(Env):
     def reset(self):
         self._check_sizes()
+        A = torch.rand(self._input_size, self.get_output_size())
+        B = torch.rand(1, self.get_output_size())
+        C = [A.sum(dim=0) + B for _ in range(self.get_input_size())]
+        sum = torch.cat(C, 0)
+        self.A = A.div(sum)
+        self.B = B.div(sum)
+
     def observation(self):
         self.__state = torch.rand(self._input_size)
         if CUDA:
@@ -97,7 +111,12 @@ class LinApr(Env):
         return self.__state
 
     def step(self, action):
-        y = self.__state.sum()/self.get_output_size()
+        y = self.A * action + self.B # is Action size (4, 1)?
         if CUDA:
             return self.observation(), torch.tensor([y] * self.get_output_size()).to(torch.device('cuda:0'))
-        return self.observation(), torch.tensor([y] * self.get_output_size())
+        return self.observation(), y
+
+
+A = torch.rand(20, 20)
+B = torch.rand(1, 20)
+Asum = A.sum(dim=1) + B
