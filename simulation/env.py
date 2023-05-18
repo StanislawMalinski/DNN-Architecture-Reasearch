@@ -51,15 +51,17 @@ class Mem(Env):
         super().__init__()
         self.number_of_patterns = pattern
 
+    def enlarge(self, add):
+        for i in range(add):
+            X = torch.round(torch.rand(self._input_size))
+            Y = torch.round(torch.rand(self._output_size))
+            self.set.append((X, Y))
+
     def reset(self):
         self._check_sizes()
         self.set = []
         torch.manual_seed(1)
-        for i in range(self.number_of_patterns):
-            A = torch.round(torch.rand(self._input_size))
-            B = torch.round(torch.rand(self._output_size))
-
-            self.set.append((A, B))
+        self.enlarge(self.number_of_patterns)
         return self.observation()
 
     def observation(self):
