@@ -1,13 +1,17 @@
 import os
 from datetime import datetime
 
-terms = {"opt": "Optymalizator",
-         "func": "Funkcja akywacji",
-         "arra": "Rozkład neuronów",
-         "lay": "Liczba ukrytych warstw",
-         "neu": "Liczba neuronów",
-         "lr": "Tępo uczenia",
-         "bs": "Liczba wzorców w epoce"}
+terms = {"opt": "Optimizer",
+         "func": "Activation function",
+         "arra": "Arrangement of neurons",
+         "lay": "Number of hidden layer",
+         "neu": "Number of neurons",
+         "lr": "Learning rate",
+         "bs": "Number of patterns in epoch",
+         "neu_per_lay" : "Number of neurons per layer",
+         "lay_per_neu": "Number of leyers with new neurons",
+         "n_lay": "Number of layer",
+         "n_neu": "Number of neurons"}
 
 def save_results(test, win):
     to_root = os.path.abspath("Results")

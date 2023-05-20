@@ -64,3 +64,44 @@ def bs_train_loop(env: Env, model, optimizer, batch):
             Status.get_status().print(f"loss: {loss_l:>7f}")
 
     return min
+
+def loss_criterium(loss):
+    epsilon = 1e-6
+    return loss[0] - loss[-1] < epsilon
+
+def avg(loss):
+    return sum(loss)/len(loss)
+def simulation_mem(mb: ModelBuilder, env_configuration, opt, lr, bs):
+    EPOCH = 20
+    mb.set_input(INPUT)
+    mb.set_classes(OUTPUT)
+    model = mb.finalize()
+
+    env = Mem(1)
+    env.set_input_size(INPUT)
+    env.set_output_size(OUTPUT)
+    env.reset()
+
+    last_size = env_configuration[0]
+
+    res = []
+
+
+    for size in env_configuration:
+        env.enlarge(size - last_size)
+        last_size = size - last_size
+        big_epoch = 0
+
+        losses = [n for n in range(EPOCH)]
+
+        while loss_criterium(losses):
+            big_epoch += 1
+            if big_epoch > 1:
+                Status.get_status().add_epoch(EPOCH)
+
+            for eph in range(EPOCH):
+                Status.get_status().tic_epoch(f"epoch: {(big_epoch-1)*EPOCH + eph}")
+                r = bs_train_loop(env, model, opt(params=model.parameters(), lr=lr), bs)
+                losses[eph] = r
+        res.append(avg(losses))
+    return res

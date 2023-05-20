@@ -27,6 +27,9 @@ class ModelBuilder:
     def set_hidden_layers(self, n):
         self.hiden_layer = n
 
+    def get_hidden_layers(self):
+        return self.hiden_layer
+
     def set_arrangement(self, arrangement):
         self.arrangement = arrangement
 
@@ -35,6 +38,9 @@ class ModelBuilder:
 
     def set_neurons(self, n):
         self.num_of_neurons = n
+
+    def get_neurons(self):
+        return self.num_of_neurons
 
     def clear(self):
         self.func = self.std["func"]

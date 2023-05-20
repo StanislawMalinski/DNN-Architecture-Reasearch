@@ -15,8 +15,8 @@ class Status:
     def get_status():
         return Status.stat
 
-    def update(self, new_max):
-        self.max = new_max
+    def add_epoch(self, new):
+        self.max += new
 
     def tic_epoch(self, msg=None):
         #if msg is not None:

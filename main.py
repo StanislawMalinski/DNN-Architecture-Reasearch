@@ -7,13 +7,28 @@ from simulation.env import Mem, SqApr, LinApr
 from util import save_results
 
 # If the computer that you are running uses Windows please set option WINDOWS to True
-WINDOWS = False
+WINDOWS = True
+
+# Standard Model for memory
+NUMBER_OF_LAYERS_m = 4
+NUMBER_OF_NEURONS_m = 50
+ACTIVATION_FUNCTION_m = nn.ReLU
+DEFAULT_BATCH_SIZE_m = 30
+DEFAULT_LEARNING_RATE_m = 0.0001
+DEFAULT_OPTIMIZER_m = op.RMSprop
+
+# Memory capacity test
+number_of_pattern_tested = tuple(range(1, 302, 10))
+
+number_of_layer_per_neuron = tuple(range(1,21)) # changing number of neurons and number of layers
+number_of_neuron_per_layer = tuple(range(5, 51, 5)) # changing number of neurons and number of layers
+number_of_layer = tuple(range(1,21))
+number_of_neurons = tuple(range(20, 301, 20))  # changing only number of layers
 
 # To perform simulation fill in the variables bellow:
 epoch_numb_speed = 100
-epoch_numb_mem = 100
 
-# Standard Model
+# Standard Model for speed
 NUMBER_OF_LAYERS = 2
 NUMBER_OF_NEURONS = 60
 ACTIVATION_FUNCTION = nn.ReLU
@@ -26,12 +41,6 @@ DEFAULT_OPTIMIZER = op.Adam
 envs = {"Pattern memorising": Mem,
         "Square function aproximation": SqApr,
         "Linear function aproximation": LinApr}
-
-# Memory capacity test
-number_of_pattern_tested = tuple(range(5, 50, 5))
-number_of_neuron_per_layer = tuple(range(20, 40, 4))  # changing number of neurons and number of layers
-number_of_layer = tuple(range(1, 8))
-number_of_neurons = tuple(range(60, 200, 20))  # changing only number of layers
 
 # 1
 optimizer = (
@@ -73,6 +82,13 @@ if __name__ == '__main__':
            "lr": DEFAULT_LEARNING_RATE,
            "bs": DEFAULT_BATCH_SIZE}
 
+    std_m = {"opt": DEFAULT_OPTIMIZER_m,
+             "func": ACTIVATION_FUNCTION_m,
+             "lay": NUMBER_OF_LAYERS_m,
+             "neu": NUMBER_OF_NEURONS_m,
+             "lr": DEFAULT_LEARNING_RATE_m,
+             "bs": DEFAULT_BATCH_SIZE_m}
+
     #  Speed test
     tested_configuration_speed = {"opt": optimizer,
                                   "func": activation_func,
@@ -86,13 +102,16 @@ if __name__ == '__main__':
 
     #  Memory test
     tested_configuration_mem = {"problem_size": number_of_pattern_tested,
+                                "lay_per_neu": number_of_layer_per_neuron,
                                 "neu_per_lay": number_of_neuron_per_layer,
                                 "n_lay": number_of_layer,
                                 "n_neu": number_of_neurons,
-                                "std_model": std}
+                                "std_model": std_m}
 
     # Tests
-    res_speed = run_tests_speed(epoch_numb_speed, tested_configuration_speed)
-    #save_results(res_speed, WINDOWS)
-    #res_mem = run_tests_mem(epoch_numb_mem, tested_configuration_mem)
-    #save_results(res_mem, WINDOWS)
+
+    # res_speed = run_tests_speed(epoch_numb_speed, tested_configuration_speed)
+    # save_results(res_speed, WINDOWS)
+
+    res_mem = run_tests_mem(tested_configuration_mem)
+    save_results(res_mem, WINDOWS)
